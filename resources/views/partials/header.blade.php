@@ -5,8 +5,8 @@
         </div>
 
         <ul class="hidden lg:flex space-x-8 items-center text-white">
-            <li><a href="#" class="hover:text-cyan-400">Home</a></li>
-            <li><a href="#" class="hover:text-cyan-400">Rooms</a></li>
+            <li><a href="{{ route('home') }}" class="hover:text-cyan-400">Home</a></li>
+            <li><a href="{{ route('rooms') }}" class="hover:text-cyan-400">Rooms</a></li>
             <li><a href="#" class="hover:text-cyan-400">Facilities</a></li>
             <li><a href="#" class="hover:text-cyan-400">Contact</a></li>
             <li>
@@ -23,8 +23,8 @@
         <div id="mobile-menu"
             class="hidden absolute top-full left-0 w-full bg-gray-900 shadow-lg border-t border-gray-800">
             <ul class="flex flex-col p-6 space-y-4 text-white text-center">
-                <li><a href="#" class="block hover:text-cyan-400">Home</a></li>
-                <li><a href="#" class="block hover:text-cyan-400">Rooms</a></li>
+                <li><a href="{{ route('home') }}" class="block hover:text-cyan-400">Home</a></li>
+                <li><a href="{{ route('rooms') }}" class="block hover:text-cyan-400">Rooms</a></li>
                 <li><a href="#" class="block hover:text-cyan-400">Facilities</a></li>
                 <li><a href="#" class="block hover:text-cyan-400">Contact</a></li>
                 <li>

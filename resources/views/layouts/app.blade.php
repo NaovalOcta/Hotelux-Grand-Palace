@@ -13,8 +13,7 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
 
-    <link rel="stylesheet" href="{{ asset('css/output.css') }}" />
-    <link rel="stylesheet" href="{{ asset('css/animation.css') }}">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -48,7 +47,6 @@
 
     @include('partials.modal')
 
-    <script type="module" src="{{ asset('js/animation.js') }}"></script>
     <script type="module" src="{{ asset('js/app.js') }}"></script>
     <script type="module" src="{{ asset('js/landing-page-interaction.js') }}"></script>
     @stack('scripts')
