@@ -1,25 +1,31 @@
-<section class="relative h-screen flex items-center justify-center bg-cover bg-center"
-    style="
-    background-image: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop');
-"
-    id="hero-section" <!-- Ditambah ID untuk referensi, JS akan ganti background/img -->
-    >
-    <!-- Tambah img tag tersembunyi jika ingin JS mengganti src-nya, atau biarkan JS ganti background-image -->
-    <img id="hero-image" src="https://placehold.co/1920x1080/2d3748/cccccc?text=Loading+Hero..."
-        alt="Hero Background" class="absolute inset-0 w-full h-screen object-cover -z-10 opacity-60">
+<section id="home" class="relative h-screen flex items-center justify-center text-white">
+    {{-- Background Image dengan Overlay --}}
+    <div class="absolute inset-0 z-0">
+        <img src="{{ $hotel->hero_image ?? asset('images/default-hero.jpg') }}"
+             alt="Hotel Hero"
+             class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-black/50"></div>
+    </div>
 
-    <div class="absolute inset-0 bg-black/60"></div>
-    <div class="relative text-center text-white z-1 px-4">
-        <!-- Nama Hotel (ditambah class hotel-name) -->
-        <h1 class="hotel-name text-5xl md:text-7xl font-bold mb-4">
-            Welcome to Hotelux
-        </h1>
-        <!-- Tagline (ditambah ID) -->
-        <p id="hero-tagline" class="text-xl md:text-2xl mb-8">
-            Experience luxury like never before.
+    {{-- Content --}}
+    <div class="relative z-10 text-center px-6 max-w-4xl mx-auto">
+        <p class="text-amber-400 font-medium tracking-widest uppercase mb-4 animate-fade-in-down">
+            Welcome to {{ $hotel->name }}
         </p>
-        <a href="#"
-            class="bg-cyan-500 text-gray-900 px-8 py-3 rounded-full font-semibold text-lg hover:bg-cyan-400 transition">Explore
-            Rooms</a>
+        <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight animate-fade-in-up">
+            {{ $hotel->tagline }}
+        </h1>
+        <p class="text-lg md:text-xl text-gray-200 mb-10 animate-fade-in-up delay-100">
+            {{ $hotel->description_short }}
+        </p>
+
+        <div class="flex flex-col md:flex-row gap-4 justify-center animate-fade-in-up delay-200">
+            <a href="#rooms" class="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-full font-semibold transition duration-300">
+                Book Your Stay
+            </a>
+            <a href="#about" class="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-3 rounded-full font-semibold transition duration-300">
+                Discover More
+            </a>
+        </div>
     </div>
 </section>

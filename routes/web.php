@@ -1,11 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\RoomType;
+use App\Http\Controllers\HomeController;
 
-Route::get('/', function () {
-    return view('home');
-})->name('home');
-
-Route::get('/rooms', function () {
-    return view('rooms.index');
-})->name('rooms');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/rooms', [HomeController::class, 'rooms'])->name('rooms');

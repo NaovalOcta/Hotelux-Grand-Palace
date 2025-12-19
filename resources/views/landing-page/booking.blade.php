@@ -1,74 +1,44 @@
-<section id="booking-section" class="py-20 bg-gray-900">
-            <div class="container mx-auto px-6">
-                <h2 class="text-3xl font-semibold text-white text-center mb-12">
-                    Book Your Stay
-                </h2>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    <div class="relative rounded-lg overflow-hidden shadow-xl h-[200px] lg:h-[400px]">
-                        <img src="https://xdmrhxrztxyqpfzfzxxd.supabase.co/storage/v1/object/public/hotel_images/Reception-Hotel.jpg"
-                            alt="Hotel Scenery" class="absolute inset-0 w-full h-full object-cover" />
-                    </div>
+<section id="booking" class="py-20 bg-gray-100">
+    <div class="container mx-auto px-6">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 md:p-12 -mt-32 relative z-20">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Check Availability</h2>
 
-                    <div>
-                        <form id="booking-form" class="bg-gray-800 p-8 rounded-lg shadow-lg space-y-6 h-full">
-                            <div id="booking-message"></div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label for="guest-name" class="block text-sm font-medium text-gray-300">Full
-                                        Name</label>
-                                    <input type="text" id="guest-name" name="guest_name" required
-                                        class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-cyan-500 focus:border-cyan-500">
-                                </div>
-                                <div>
-                                    <label for="guest-email"
-                                        class="block text-sm font-medium text-gray-300">Email</label>
-                                    <input type="email" id="guest-email" name="guest_email" required
-                                        class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-cyan-500 focus:border-cyan-500">
-                                </div>
-                            </div>
-                            <div>
-                                <label for="booking-room-select" class="block text-sm font-medium text-gray-300">Room
-                                    Type</label>
-                                <select id="booking-room-select" name="room_id" required
-                                    class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-cyan-500 focus:border-cyan-500">
-                                    <option value="">Loading rooms...</option>
-                                </select>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label for="check-in" class="block text-sm font-medium text-gray-300">Check-in
-                                        Date</label>
-                                    <input type="date" id="check-in" name="check_in" required
-                                        class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 date-input">
-                                </div>
-                                <div>
-                                    <label for="check-out" class="block text-sm font-medium text-gray-300">Check-out
-                                        Date</label>
-                                    <input type="date" id="check-out" name="check_out" required
-                                        class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 date-input">
-                                </div>
-                            </div>
-                            <div>
-                                <label for="total-price" class="block text-sm font-medium text-gray-300">Total Price
-                                    (IDR)</label>
-                                <input type="number" id="total-price" name="total_price" readonly
-                                    placeholder="Calculated automatically"
-                                    class="mt-1 block w-full bg-gray-600 border border-gray-500 rounded-md shadow-sm py-2 px-3 text-gray-400 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500">
-                            </div>
-                            <div>
-                                <button type="submit" id="booking-submit-btn"
-                                    class="w-full bg-cyan-500 text-gray-900 px-6 py-3 rounded-md font-semibold text-lg hover:bg-cyan-400 transition">
-                                    Submit Booking
-                                </button>
-                            </div>
-                            <style>
-                                .date-input::-webkit-calendar-picker-indicator {
-                                    filter: invert(0.8);
-                                }
-                            </style>
-                        </form>
-                    </div>
+            <form action="#" method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {{-- Check In --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Check In</label>
+                    <input type="date" name="check_in"
+                        class="w-full border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500 p-3 bg-gray-50">
                 </div>
-            </div>
-        </section>
+
+                {{-- Check Out --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Check Out</label>
+                    <input type="date" name="check_out"
+                        class="w-full border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500 p-3 bg-gray-50">
+                </div>
+
+                {{-- Room Type Select (Dynamic) --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
+                    <select name="room_type"
+                        class="w-full border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500 p-3 bg-gray-50">
+                        <option value="">All Rooms</option>
+                        @foreach ($rooms as $room)
+                            <option value="{{ $room->id }}">{{ $room->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Button --}}
+                <div class="flex items-end">
+                    <button type="submit"
+                        class="w-full bg-gray-900 text-white font-bold py-3 rounded-lg hover:bg-gray-800 transition duration-300 flex items-center justify-center gap-2">
+                        <span class="material-icons-outlined">search</span>
+                        Check Now
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
