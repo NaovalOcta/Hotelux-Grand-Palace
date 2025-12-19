@@ -1,0 +1,103 @@
+/* src/animations.css */
+
+/* --- 1. Base Animation Classes --- */
+.reveal-on-scroll {
+    opacity: 0;
+    transform: translate3d(0, 50px, 0);
+    transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: opacity, transform; 
+    backface-visibility: hidden;
+}
+
+.reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+}
+
+/* --- 2. Navbar Animation Base (PENTING UNTUK ANIMASI KEMBALI) --- */
+/* Kita set properti transisi pada state awal header */
+header {
+    transition: background-color 0.5s ease, 
+                padding 0.5s ease, 
+                box-shadow 0.5s ease;
+    width: 100%; /* Pastikan full width */
+    z-index: 50; /* Pastikan di atas elemen lain */
+}
+
+/* --- 3. Premium Navbar Active State (Sticky & Full Screen) --- */
+/* Class ini sekarang diaplikasikan ke HEADER, bukan NAV */
+header.nav-scrolled {
+    position: fixed; /* Sticky position */
+    top: 0;
+    left: 0;
+    right: 0;
+    
+    /* Full Width Background (Dark Glass) */
+    background-color: rgba(17, 24, 39, 0.95); 
+    backdrop-filter: blur(16px); 
+    -webkit-backdrop-filter: blur(16px);
+    
+    /* Shadow halus */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+    
+    /* Sedikit padding adjustment jika perlu */
+    padding-top: 0.5rem; 
+    padding-bottom: 0.5rem;
+}
+
+/* --- 4. Hero Text Animation --- */
+.hero-text-animate {
+    opacity: 0;
+    transform: translate3d(0, 30px, 0);
+    animation: fadeUp 1.2s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards;
+}
+
+@keyframes fadeUp {
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* --- 5. Card & Footer Hover/Animation --- */
+.room-card, .promo-card, .testimonial-card, footer .grid > div {
+    transition: transform 0.4s ease-out, box-shadow 0.4s ease-out;
+    will-change: transform; 
+}
+
+.room-card:hover, .promo-card:hover {
+    transform: translate3d(0, -10px, 0); 
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.room-card img, .promo-card img {
+    transition: transform 0.7s ease-out;
+}
+
+.room-card:hover img, .promo-card:hover img {
+    transform: scale(1.05);
+}
+
+/* --- 6. Modal Animation Utilities --- */
+.modal-enter-active {
+    transition: opacity 0.3s ease-out, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-leave-active {
+    transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+/* State Tampil */
+.modal-show {
+    opacity: 1 !important;
+    transform: scale(100%) !important;
+}
+
+/* State Tersembunyi (Awal) */
+.modal-hide {
+    opacity: 0 !important;
+    transform: scale(95%) !important;
+}
+
+/* Backdrop opacity */
+.backdrop-show {
+    opacity: 1 !important;
+}
