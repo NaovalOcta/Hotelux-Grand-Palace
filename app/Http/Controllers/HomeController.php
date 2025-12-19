@@ -28,6 +28,6 @@ class HomeController extends Controller
     {
         $rooms = RoomType::all();
         $hotel = HotelProfile::first();
-        return view('rooms.index', compact('hotel', 'rooms'));
+        return view('rooms.index', compact('rooms', 'hotel'));
     }
 }

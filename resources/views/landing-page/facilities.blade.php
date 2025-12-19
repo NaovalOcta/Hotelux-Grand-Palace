@@ -14,14 +14,29 @@
                     <h3 class="text-xl font-bold text-amber-500 mb-6">{{ $facility->category }}</h3>
 
                     <ul class="space-y-4">
-                        @foreach($facility->items as $item)
-                        <li class="flex items-center text-gray-300">
-                            <div class="bg-gray-700 p-2 rounded-lg mr-3 text-amber-400">
-                                <span class="material-icons-outlined text-sm">{{ $item['icon'] }}</span>
-                            </div>
-                            <span class="text-sm font-medium">{{ $item['name'] }}</span>
-                        </li>
-                        @endforeach
+                        {{-- LOGIKA PERBAIKAN: --}}
+                        {{-- 1. Cek apakah items string? Jika ya, decode manual. --}}
+                        {{-- 2. Cek apakah hasil decode adalah array? Jika ya, baru di-loop. --}}
+                        @php
+                            $items = $facility->items;
+                            if (is_string($items)) {
+                                $items = json_decode($items, true);
+                            }
+                        @endphp
+
+                        @if(is_array($items) || is_object($items))
+                            @foreach($items as $item)
+                            <li class="flex items-center text-gray-300">
+                                <div class="bg-gray-700 p-2 rounded-lg mr-3 text-amber-400">
+                                    {{-- Menggunakan null coalescing operator (??) untuk mencegah error jika key 'icon' hilang --}}
+                                    <span class="material-icons-outlined text-sm">{{ $item['icon'] ?? 'star' }}</span>
+                                </div>
+                                <span class="text-sm font-medium">{{ $item['name'] ?? '' }}</span>
+                            </li>
+                            @endforeach
+                        @else
+                            <li class="text-gray-500 italic text-sm">No facilities listed.</li>
+                        @endif
                     </ul>
                 </div>
             @endforeach

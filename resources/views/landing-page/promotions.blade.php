@@ -1,4 +1,4 @@
-<section id="promotions" class="py-20 bg-amber-600">
+<section id="promotions" class="py-20 bg-gray-800">
     <div class="container mx-auto px-6">
         <div class="flex flex-col md:flex-row items-center justify-between mb-12">
             <h2 class="text-3xl font-bold text-white">Exclusive Offers</h2>
