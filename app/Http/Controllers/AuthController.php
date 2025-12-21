@@ -12,36 +12,32 @@ use Illuminate\Support\Facades\Validator;
 class AuthController extends Controller
 {
     /**
-     * Create a new AuthController instance.
-     */
-    public function __construct()
-    {
-        // Middleware auth:api digunakan untuk semua method kecuali login & register
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
-    }
-
-    /**
-     * Get a JWT via given credentials.
+     * API: Get a JWT via given credentials.
+     * Digunakan oleh Postman/API atau Form Login via JS Fetch
      */
     public function login()
     {
         $credentials = request(['email', 'password']);
 
-        // PERBAIKAN: Gunakan Auth::guard('api') agar eksplisit
-        // Jika error "Call to undefined method attempt()", cek langkah no. 2 di bawah!
         if (! $token = Auth::guard('api')->attempt($credentials)) {
+            // Jika request datang dari browser biasa (bukan API client yang mengharap JSON)
+            // Kita bisa kembalikan error ke halaman login
+            if (!request()->expectsJson()) {
+                return back()->withErrors(['email' => 'Unauthorized / Wrong Credentials']);
+            }
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
+        // Jika request dari browser (Form Submit biasa), tampilkan token (atau simpan di cookie idealnya)
+        // Untuk saat ini kita return JSON token agar sesuai permintaan JWT Anda
         return $this->respondWithToken($token);
     }
 
     /**
-     * Register a User.
+     * API: Register a User.
      */
     public function register(Request $request)
     {
-        // PERBAIKAN: Gunakan Validator facade yang sudah di-import
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -50,6 +46,9 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if (!request()->expectsJson()) {
+                return back()->withErrors($validator)->withInput();
+            }
             return response()->json($validator->errors()->toJson(), 400);
         }
 
@@ -61,8 +60,13 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
-        // Login otomatis setelah register
         $token = Auth::guard('api')->login($user);
+
+        if (!request()->expectsJson()) {
+            // Redirect ke home jika register dari web, tapi ini tricky karena JWT stateless.
+            // Idealnya web user pakai Session, tapi karena request JWT, user akan melihat JSON Token.
+            return $this->respondWithToken($token);
+        }
 
         return response()->json([
             'message' => 'User successfully registered',
@@ -72,7 +76,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Get the authenticated User.
+     * API: Get the authenticated User.
      */
     public function me()
     {
@@ -80,16 +84,21 @@ class AuthController extends Controller
     }
 
     /**
-     * Log the user out (Invalidate the token).
+     * API: Log the user out (Invalidate the token).
      */
     public function logout()
     {
         Auth::guard('api')->logout();
+
+        if (!request()->expectsJson()) {
+            return redirect()->route('login');
+        }
+
         return response()->json(['message' => 'Successfully logged out']);
     }
 
     /**
-     * Refresh a token.
+     * API: Refresh a token.
      */
     public function refresh()
     {
@@ -97,7 +106,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Get the token array structure.
+     * Helper: Get the token array structure.
      */
     protected function respondWithToken($token)
     {
@@ -107,5 +116,25 @@ class AuthController extends Controller
             'expires_in' => Auth::guard('api')->factory()->getTTL() * 60,
             'user' => Auth::guard('api')->user()
         ]);
+    }
+
+    // =========================================================================
+    // WEB VIEWS (Metode yang Hilang & Menyebabkan Error)
+    // =========================================================================
+
+    /**
+     * Menampilkan Halaman Login (Blade)
+     */
+    public function showLogin()
+    {
+        return view('auth.login');
+    }
+
+    /**
+     * Menampilkan Halaman Register (Blade)
+     */
+    public function showRegister()
+    {
+        return view('auth.register');
     }
 }
