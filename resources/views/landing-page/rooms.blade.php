@@ -56,7 +56,7 @@
                                     Rp {{ number_format($price, 0, ',', '.') }}
                                 </span>
                             </div>
-                            <a href="{{ route('rooms') }}"
+                            <a href="{{ route('rooms.index') }}"
                                 class="text-white hover:text-amber-500 font-medium text-sm transition">
                                 View Details &rarr;
                             </a>
@@ -71,7 +71,7 @@
         </div>
 
         <div class="text-center mt-12">
-            <a href="{{ route('rooms') }}"
+            <a href="{{ route('rooms.index') }}"
                 class="inline-block border border-amber-600 text-amber-500 hover:bg-amber-600 hover:text-white px-8 py-3 rounded-full transition duration-300">
                 View All Room Types
             </a>

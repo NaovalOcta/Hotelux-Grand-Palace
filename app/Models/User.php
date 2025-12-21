@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'phone',
     ];
 
     /**
@@ -43,6 +45,20 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+        ];
+    }
+
+    // Wajib: Identifier untuk token (biasanya ID user)
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    // Wajib: Custom claims (data tambahan di dalam token, misal: role)
+    public function getJWTCustomClaims()
+    {
+        return [
+            'role' => $this->role, // Kita simpan role di dalam token agar mudah dicek
         ];
     }
 }
