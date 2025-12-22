@@ -12,9 +12,9 @@ class RoomType extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'gallery_images' => 'array',
         'amenities' => 'array',
         'rate_plans' => 'array',
+        'gallery_images' => 'array',
         'occupancy' => 'array',
     ];
 

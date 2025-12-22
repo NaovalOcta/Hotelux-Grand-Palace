@@ -24,7 +24,8 @@ class AdminRoomController extends Controller
     // Simpan kamar baru
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        // 1. VALIDASI
+        $request->validate([
             'id' => 'required|string|unique:room_types,id',
             'name' => 'required|string',
             'description' => 'required|string',
@@ -35,15 +36,34 @@ class AdminRoomController extends Controller
             'bed_type' => 'required|string',
             'max_adults' => 'required|integer',
             'max_children' => 'required|integer',
-            'amenities_input' => 'nullable|string', // Input string dipisahkan koma
-            'images_input' => 'nullable|string',    // Input URL dipisahkan koma
+            'amenities_input' => 'nullable|string',
+            // VALIDASI GAMBAR DIPERKETAT
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048', // Max 2MB per file
+        ], [
+            // PESAN ERROR KHUSUS
+            'images.*.image' => 'File yang diupload harus berupa gambar.',
+            'images.*.mimes' => 'Format gambar salah! Hanya diperbolehkan: JPG, JPEG, PNG, dan WEBP.',
+            'images.*.max' => 'Ukuran gambar terlalu besar! Maksimal 2MB per foto.',
         ]);
 
-        // Proses data untuk format JSON
+        // 2. PROSES AMENITIES (String to Array)
         $amenities = $request->amenities_input ? array_map('trim', explode(',', $request->amenities_input)) : [];
-        $images = $request->images_input ? array_map('trim', explode(',', $request->images_input)) : [];
 
-        // Struktur Rate Plans sederhana
+        // 3. ALGORITMA UPLOAD GAMBAR (PENTING!)
+        $galleryImages = [];
+
+        // Cek apakah ada file yang diupload
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                // Simpan file ke folder 'storage/app/public/rooms'
+                // method store() mengembalikan path file (misal: rooms/namafile.jpg)
+                $path = $file->store('rooms', 'public');
+                $galleryImages[] = $path;
+            }
+        }
+
+        // 4. STRUKTUR RATE PLANS
         $ratePlans = [[
             'name' => 'Standard Rate',
             'price_per_night' => (int)$request->price_per_night,
@@ -51,6 +71,7 @@ class AdminRoomController extends Controller
             'includes_breakfast' => true
         ]];
 
+        // 5. SIMPAN KE DATABASE
         RoomType::create([
             'id' => Str::slug($request->id),
             'name' => $request->name,
@@ -64,7 +85,7 @@ class AdminRoomController extends Controller
                 'max_children' => (int)$request->max_children
             ],
             'amenities' => $amenities,
-            'gallery_images' => $images,
+            'gallery_images' => $galleryImages, // Array path disimpan otomatis sebagai JSON (jika cast di model benar)
             'rate_plans' => $ratePlans
         ]);
 
@@ -101,9 +122,15 @@ class AdminRoomController extends Controller
     {
         $room = RoomType::findOrFail($id);
 
+        // VALIDASI UPDATE
         $request->validate([
             'name' => 'required|string',
             'price_per_night' => 'required|numeric',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+        ], [
+            'images.*.mimes' => 'Format gambar ditolak! Gunakan JPG, JPEG, PNG, atau WEBP.',
+            'images.*.max' => 'Ukuran gambar maksimal 2MB.',
         ]);
 
         // Proses ulang array

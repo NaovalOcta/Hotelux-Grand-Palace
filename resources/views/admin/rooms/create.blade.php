@@ -90,19 +90,31 @@
                             class="w-full bg-gray-900 border border-gray-700 text-white rounded-lg px-4 py-3 focus:border-amber-500 focus:outline-none">
                     </div>
 
-                    {{-- CHANGE: From Textarea URL to File Input --}}
-                    <div class="bg-gray-700/30 p-4 rounded-lg border border-gray-600 border-dashed">
+                    <div
+                        class="bg-gray-700/30 p-4 rounded-lg border {{ $errors->has('images.*') ? 'border-red-500' : 'border-gray-600' }} border-dashed">
                         <label class="block text-sm font-medium text-white mb-2">Upload Images</label>
-                        <input type="file" name="images[]" multiple accept="image/*"
+                        <input type="file" name="images[]" multiple accept="image/jpeg, image/png, image/jpg, image/webp"
                             class="block w-full text-sm text-gray-400
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-full file:border-0
-                        file:text-sm file:font-semibold
-                        file:bg-amber-600 file:text-white
-                        file:cursor-pointer hover:file:bg-amber-700
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-full file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-amber-600 file:text-white
+                            file:cursor-pointer hover:file:bg-amber-700
                     " />
-                        <p class="text-xs text-gray-500 mt-2">Allowed: JPG, PNG, WEBP. Max: 2MB per file. You can select
-                            multiple files.</p>
+
+                        <p class="text-xs text-gray-500 mt-2">Allowed: JPG, PNG, WEBP. Max: 2MB.</p>
+
+                        {{-- MENAMPILKAN PESAN ERROR JIKA FORMAT SALAH --}}
+                        @if ($errors->has('images.*') || $errors->has('images'))
+                            <div class="mt-2 text-red-400 text-sm bg-red-400/10 p-2 rounded">
+                                @foreach ($errors->get('images.*') as $message)
+                                    <p class="flex items-center gap-1">
+                                        <span class="material-icons-outlined text-sm">error</span>
+                                        {{ $message[0] }}
+                                    </p>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
 
                     <div class="pt-6 border-t border-gray-700 flex justify-end">
