@@ -19,9 +19,11 @@
                         <span class="material-icons-outlined text-sm">bed</span>
                         Manage Rooms
                     </a>
-                    <button
-                        class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition border border-gray-700">Manage
-                        Bookings</button>
+                    <a href="{{ route('admin.bookings.index') }}"
+                        class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition border border-gray-700 flex items-center gap-2">
+                        <span class="material-icons-outlined text-sm">book_online</span>
+                        Manage Bookings
+                    </a>
                 </div>
             </div>
 

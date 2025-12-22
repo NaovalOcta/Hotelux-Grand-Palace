@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminRoomController;
+use App\Http\Controllers\AdminBookingController;
 use App\Http\Middleware\RoleMiddleware;
 
 /*
@@ -48,6 +49,9 @@ Route::middleware(['auth:web', RoleMiddleware::class . ':admin'])
         // CRUD Rooms (Manage Kamar)
         // Ini otomatis membuat route: admin.rooms.index, create, store, edit, update, destroy
         Route::resource('rooms', AdminRoomController::class);
+
+        // CRUD Bookings (Manage Pemesanan)
+        Route::resource('bookings', AdminBookingController::class);
     });
 
 // --- USER ROUTES (Protected) ---
