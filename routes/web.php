@@ -11,6 +11,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/rooms', [HomeController::class, 'rooms'])->name('rooms.index');
 Route::get('/facilities', [HomeController::class, 'facilities'])->name('facilities.index');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact.index');
+Route::post('/contact', [HomeController::class, 'sendContact'])->name('contact.send');
 
 // --- AUTH ROUTES ---
 Route::middleware('guest')->group(function () {

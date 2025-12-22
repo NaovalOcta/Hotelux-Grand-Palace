@@ -11,31 +11,53 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    /**
-     * API: Get a JWT via given credentials.
-     * Digunakan oleh Postman/API atau Form Login via JS Fetch
-     */
+    // --- FITUR LOGIN ---
+
+    public function showLogin()
+    {
+        return view('auth.login');
+    }
+
     public function login()
     {
         $credentials = request(['email', 'password']);
 
-        if (! $token = Auth::guard('api')->attempt($credentials)) {
-            // Jika request datang dari browser biasa (bukan API client yang mengharap JSON)
-            // Kita bisa kembalikan error ke halaman login
-            if (!request()->expectsJson()) {
+        // 1. Cek Login menggunakan Guard 'web' dulu untuk verifikasi password
+        // Kita tidak langsung pakai guard('api')->attempt() karena itu kadang return token langsung
+        // tanpa validasi tipe object User yang ketat, yang menyebabkan error Type Error tadi.
+
+        if (! Auth::guard('web')->attempt($credentials)) {
+             // Jika gagal login session
+             if (!request()->expectsJson()) {
                 return back()->withErrors(['email' => 'Unauthorized / Wrong Credentials']);
             }
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        // Jika request dari browser (Form Submit biasa), tampilkan token (atau simpan di cookie idealnya)
-        // Untuk saat ini kita return JSON token agar sesuai permintaan JWT Anda
+        // 2. Jika sukses login session, ambil user-nya
+        $user = Auth::guard('web')->user();
+
+        // 3. Generate Token secara manual untuk user tersebut
+        // Ini menghindari error JWTSubject karena kita mempassing object $user yang valid
+        $token = Auth::guard('api')->login($user);
+
+        // 4. Response
+        if (!request()->expectsJson()) {
+            // Jika browser, tetap redirect ke home (Session sudah terbentuk di langkah 1)
+            return redirect()->route('home');
+        }
+
+        // Jika API, kembalikan token
         return $this->respondWithToken($token);
     }
 
-    /**
-     * API: Register a User.
-     */
+    // --- FITUR REGISTER ---
+
+    public function showRegister()
+    {
+        return view('auth.register');
+    }
+
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -45,7 +67,7 @@ class AuthController extends Controller
             'phone' => 'required|string',
         ]);
 
-        if ($validator->fails()) {
+        if($validator->fails()){
             if (!request()->expectsJson()) {
                 return back()->withErrors($validator)->withInput();
             }
@@ -60,12 +82,12 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
+        // Auto login setelah register
         $token = Auth::guard('api')->login($user);
 
         if (!request()->expectsJson()) {
-            // Redirect ke home jika register dari web, tapi ini tricky karena JWT stateless.
-            // Idealnya web user pakai Session, tapi karena request JWT, user akan melihat JSON Token.
-            return $this->respondWithToken($token);
+            Auth::guard('web')->login($user); // Login session untuk browser
+            return redirect()->route('home')->with('success', 'Registration successful!');
         }
 
         return response()->json([
@@ -75,20 +97,17 @@ class AuthController extends Controller
         ], 201);
     }
 
-    /**
-     * API: Get the authenticated User.
-     */
+    // --- UTILITIES ---
+
     public function me()
     {
         return response()->json(Auth::guard('api')->user());
     }
 
-    /**
-     * API: Log the user out (Invalidate the token).
-     */
     public function logout()
     {
-        Auth::guard('api')->logout();
+        Auth::guard('api')->logout(); // Logout JWT
+        Auth::guard('web')->logout(); // Logout Session Web
 
         if (!request()->expectsJson()) {
             return redirect()->route('login');
@@ -97,17 +116,11 @@ class AuthController extends Controller
         return response()->json(['message' => 'Successfully logged out']);
     }
 
-    /**
-     * API: Refresh a token.
-     */
     public function refresh()
     {
         return $this->respondWithToken(Auth::guard('api')->refresh());
     }
 
-    /**
-     * Helper: Get the token array structure.
-     */
     protected function respondWithToken($token)
     {
         return response()->json([
@@ -116,25 +129,5 @@ class AuthController extends Controller
             'expires_in' => Auth::guard('api')->factory()->getTTL() * 60,
             'user' => Auth::guard('api')->user()
         ]);
-    }
-
-    // =========================================================================
-    // WEB VIEWS (Metode yang Hilang & Menyebabkan Error)
-    // =========================================================================
-
-    /**
-     * Menampilkan Halaman Login (Blade)
-     */
-    public function showLogin()
-    {
-        return view('auth.login');
-    }
-
-    /**
-     * Menampilkan Halaman Register (Blade)
-     */
-    public function showRegister()
-    {
-        return view('auth.register');
     }
 }

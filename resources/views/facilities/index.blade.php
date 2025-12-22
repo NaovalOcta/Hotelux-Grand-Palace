@@ -105,7 +105,7 @@
                 Book your stay today and enjoy full access to all our world-class facilities.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ route('rooms') }}"
+                <a href="{{ route('rooms.index') }}"
                     class="bg-gray-900 text-white px-8 py-3 rounded-full font-bold hover:bg-gray-800 transition shadow-lg">
                     Book a Room
                 </a>
