@@ -1,129 +1,147 @@
 @extends('layouts.app')
 
-@section('title', 'Manage Rooms')
+@section('title', 'All Accommodations - Hotelux')
 
 @section('content')
-    <div class="pt-32 pb-12 bg-gray-900 min-h-screen">
+    {{-- Page Header --}}
+    <section class="relative pt-40 pb-20 flex items-center justify-center min-h-[50vh] bg-cover bg-center bg-fixed"
+        style="background-image: url('{{ asset('images/room-header-bg.jpg') }}');">
+        <div class="absolute inset-0 bg-black/60"></div>
+        <div class="relative container mx-auto px-6 text-center z-10">
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 animate-fade-in-up">
+                Our Accommodations
+            </h1>
+            <p class="text-gray-200 text-lg max-w-2xl mx-auto animate-fade-in-up delay-100">
+                Discover your perfect sanctuary in the heart of the city.
+            </p>
+        </div>
+    </section>
+
+    {{-- Room List --}}
+    <section class="py-20 bg-gray-900">
         <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 gap-12">
+                @forelse($rooms as $room)
+                    @php
+                        // LOGIKA PERBAIKAN: Safe Decoding
+                        // 1. Gallery Images
+                        $images = $room->gallery_images;
+                        if (is_string($images)) {
+                            $images = json_decode($images, true);
+                        }
+                        // Pastikan jadi array, ambil gambar pertama atau placeholder
+                        $firstImage =
+                            is_array($images) && count($images) > 0
+                                ? $images[0]
+                                : 'https://via.placeholder.com/800x600?text=No+Image';
 
-            {{-- Header --}}
-            <div class="flex justify-between items-center mb-8">
-                <div>
-                    <h1 class="text-3xl font-bold text-white">Manage Rooms</h1>
-                    <p class="text-gray-400">Create, update, or remove room types.</p>
-                </div>
-                <a href="{{ route('admin.rooms.create') }}"
-                    class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg font-bold transition flex items-center gap-2">
-                    <span class="material-icons-outlined">add</span>
-                    Add New Room
-                </a>
-            </div>
+                        // 2. Amenities
+                        $amenities = $room->amenities;
+                        if (is_string($amenities)) {
+                            $amenities = json_decode($amenities, true);
+                        }
+                        // Jika gagal decode atau null, jadikan array kosong
+                        if (!is_array($amenities)) {
+                            $amenities = [];
+                        }
 
-            {{-- Alert Success --}}
-            @if (session('success'))
-                <div
-                    class="bg-green-500/10 border border-green-500 text-green-500 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
-                    <span class="material-icons-outlined">check_circle</span>
-                    {{ session('success') }}
-                </div>
-            @endif
+                        // 3. Rate Plans (Harga)
+                        $ratePlans = $room->rate_plans;
+                        if (is_string($ratePlans)) {
+                            $ratePlans = json_decode($ratePlans, true);
+                        }
+                        $price = 0;
+                        if (is_array($ratePlans) && count($ratePlans) > 0) {
+                            $price = $ratePlans[0]['price_per_night'] ?? 0;
+                        }
+                    @endphp
 
-            {{-- Table Card --}}
-            <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-gray-400">
-                        <thead class="bg-gray-900/50 text-xs uppercase font-medium text-gray-500">
-                            <tr>
-                                <th class="px-6 py-4">Room Info</th>
-                                <th class="px-6 py-4">Price / Night</th>
-                                <th class="px-6 py-4">Size</th>
-                                <th class="px-6 py-4">Inventory</th>
-                                <th class="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-700">
-                            @forelse($rooms as $room)
-                                @php
-                                    // LOGIKA DATA
-                                    $ratePlans = is_string($room->rate_plans)
-                                        ? json_decode($room->rate_plans, true)
-                                        : $room->rate_plans;
-                                    $price = $ratePlans[0]['price_per_night'] ?? 0;
+                    <div
+                        class="bg-gray-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col lg:flex-row group border border-gray-700">
+                        {{-- Image Column --}}
+                        <div class="lg:w-1/2 relative h-64 lg:h-auto overflow-hidden">
+                            <img src="{{ $firstImage }}" alt="{{ $room->name }}"
+                                class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
 
-                                    // LOGIKA GAMBAR (SMART CHECK)
-                                    $images = is_string($room->gallery_images)
-                                        ? json_decode($room->gallery_images, true)
-                                        : $room->gallery_images;
-                                    $firstImg = $images[0] ?? null;
-                                    $thumbnail = 'https://via.placeholder.com/100x100?text=No+Image'; // Default
+                            {{-- Badge --}}
+                            <div
+                                class="absolute top-4 left-4 bg-black/50 backdrop-blur-md text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
+                                <span class="material-icons-outlined text-sm">open_in_full</span>
+                                {{ $room->size_m2 }} m²
+                            </div>
+                        </div>
 
-                                    if ($firstImg) {
-                                        // Cek apakah URL valid (http/https). Jika tidak, gunakan asset storage.
-                                        $thumbnail = filter_var($firstImg, FILTER_VALIDATE_URL)
-                                            ? $firstImg
-                                            : asset('storage/' . $firstImg);
-                                    }
-                                @endphp
-
-                                <tr class="hover:bg-gray-700/30 transition group">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-4">
-                                            {{-- Thumbnail Image --}}
-                                            <div
-                                                class="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-600 flex-shrink-0">
-                                                <img src="{{ $thumbnail }}" alt="{{ $room->name }}"
-                                                    class="w-full h-full object-cover">
-                                            </div>
-
-                                            <div>
-                                                <div class="text-white font-bold group-hover:text-amber-500 transition">
-                                                    {{ $room->name }}</div>
-                                                <span
-                                                    class="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded font-mono">{{ $room->id }}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-amber-500 font-medium font-mono">
-                                        Rp {{ number_format($price, 0, ',', '.') }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm">{{ $room->size_m2 }} m²</td>
-                                    <td class="px-6 py-4">
-                                        <span
-                                            class="px-2 py-1 rounded text-xs font-bold {{ $room->total_inventory > 0 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500' }}">
-                                            {{ $room->total_inventory }} Units
+                        {{-- Details Column --}}
+                        <div class="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
+                            <div class="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
+                                <div>
+                                    <h3 class="text-3xl font-bold text-white mb-2 leading-tight">{{ $room->name }}</h3>
+                                    <div class="flex items-center gap-3 text-amber-500 font-medium text-sm">
+                                        <span class="flex items-center gap-1">
+                                            <span class="material-icons-outlined text-base">visibility</span>
+                                            {{ $room->view_type }}
                                         </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <div class="flex justify-end gap-2">
-                                            <a href="{{ route('admin.rooms.edit', $room->id) }}"
-                                                class="p-2 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg transition"
-                                                title="Edit">
-                                                <span class="material-icons-outlined text-sm">edit</span>
-                                            </a>
+                                        <span class="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                        <span class="flex items-center gap-1">
+                                            <span class="material-icons-outlined text-base">bed</span>
+                                            {{ $room->bed_type }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="text-left md:text-right bg-gray-700/50 p-3 rounded-lg md:bg-transparent md:p-0">
+                                    <p class="text-sm text-gray-400">Starts from</p>
+                                    <p class="text-2xl font-bold text-amber-400">Rp {{ number_format($price, 0, ',', '.') }}
+                                    </p>
+                                    <p class="text-xs text-gray-500">/night</p>
+                                </div>
+                            </div>
 
-                                            <form action="{{ route('admin.rooms.destroy', $room->id) }}" method="POST"
-                                                onsubmit="return confirm('Are you sure you want to delete {{ $room->name }}?');">
-                                                @csrf @method('DELETE')
-                                                <button type="submit"
-                                                    class="p-2 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition"
-                                                    title="Delete">
-                                                    <span class="material-icons-outlined text-sm">delete</span>
-                                                </button>
-                                            </form>
+                            <p class="text-gray-300 mb-8 leading-relaxed border-l-2 border-amber-600 pl-4">
+                                {{ $room->description }}
+                            </p>
+
+                            {{-- Amenities Grid (SAFE LOOP) --}}
+                            <div class="mb-8">
+                                <h4 class="text-white font-semibold mb-3 text-sm uppercase tracking-wider text-opacity-80">
+                                    Room Features</h4>
+                                <div class="grid grid-cols-2 gap-y-2 gap-x-4">
+                                    @foreach (array_slice($amenities, 0, 6) as $amenity)
+                                        <div class="flex items-center text-gray-400 text-sm">
+                                            <span
+                                                class="material-icons-outlined text-amber-500 text-sm mr-2">check_circle</span>
+                                            {{ $amenity }}
                                         </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="px-6 py-12 text-center text-gray-500 italic">
-                                        No rooms found. Get started by adding a new room type.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                                    @endforeach
+
+                                    @if (count($amenities) > 6)
+                                        <div class="flex items-center text-amber-600 text-sm font-medium italic">
+                                            +{{ count($amenities) - 6 }} more amenities
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            {{-- Actions --}}
+                            <div class="flex gap-4 mt-auto">
+                                <button
+                                    class="flex-1 bg-amber-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-amber-700 transition flex items-center justify-center gap-2">
+                                    <span class="material-icons-outlined">calendar_today</span>
+                                    Book Now
+                                </button>
+                                <button
+                                    class="flex-1 border border-gray-600 text-gray-300 px-6 py-3 rounded-lg font-bold hover:bg-gray-700 hover:text-white transition">
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="text-center py-20">
+                        <span class="material-icons-outlined text-6xl text-gray-700 mb-4">meeting_room</span>
+                        <p class="text-gray-500 text-xl">No rooms available at the moment.</p>
+                    </div>
+                @endforelse
             </div>
         </div>
-    </div>
+    </section>
 @endsection

@@ -44,7 +44,7 @@ class HomeController extends Controller
         return view('contact.index', compact('hotel'));
     }
 
-    
+
     public function sendContact(Request $request)
     {
         // Validasi input
