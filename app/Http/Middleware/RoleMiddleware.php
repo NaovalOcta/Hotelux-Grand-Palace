@@ -16,16 +16,29 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, string $role): Response
     {
-        // Cek apakah user login menggunakan guard API
-        if (!Auth::guard('api')->check()) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
+        // 1. Cek User Login (Support Web Session & API Token)
+        $user = null;
+
+        if (Auth::guard('web')->check()) {
+            $user = Auth::guard('web')->user();
+        } elseif (Auth::guard('api')->check()) {
+            $user = Auth::guard('api')->user();
         }
 
-        $user = Auth::guard('api')->user();
+        // Jika tidak ada user yang login
+        if (!$user) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+            return redirect()->route('login');
+        }
 
-        // Cek Role
+        // 2. Cek Role
         if ($user->role !== $role) {
-            return response()->json(['message' => 'Forbidden: You do not have access.'], 403);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Forbidden: Access denied.'], 403);
+            }
+            return redirect()->route('home')->with('error', 'You do not have permission to access this page.');
         }
 
         return $next($request);

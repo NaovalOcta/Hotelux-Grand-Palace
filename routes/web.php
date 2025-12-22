@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminRoomController;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Support\Facades\Route;
 
@@ -38,4 +39,5 @@ Route::middleware(['auth', RoleMiddleware::class . ':user'])->group(function () 
 Route::middleware(['auth', RoleMiddleware::class . ':admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     // Nanti tambahkan route CRUD rooms, bookings disini
+    Route::resource('rooms', AdminRoomController::class);
 });

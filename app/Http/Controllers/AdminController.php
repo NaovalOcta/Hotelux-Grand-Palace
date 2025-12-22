@@ -20,6 +20,16 @@ class AdminController extends Controller
             'recent_bookings' => Booking::with('roomType')->latest()->take(5)->get()
         ];
 
-        return response()->json($stats);
+        // LOGIKA PERBAIKAN:
+        // Jika request minta JSON (API), kirim JSON.
+        if (request()->expectsJson()) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $stats
+            ]);
+        }
+
+        // Jika akses biasa (Browser/Menu Profile), tampilkan View Dashboard
+        return view('admin.dashboard', compact('stats'));
     }
 }
