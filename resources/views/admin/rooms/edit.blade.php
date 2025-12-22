@@ -91,12 +91,11 @@
                         <label class="block text-sm font-medium text-gray-400">Manage Gallery Images</label>
 
                         {{-- 1. Show Current Images --}}
-                        @if (count($currentImages) > 0)
+                        @if (is_array($currentImages) && count($currentImages) > 0)
                             <div
                                 class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-900 p-4 rounded-lg border border-gray-700">
-                                @foreach ($currentImages as $img)
+                                @forelse($currentImages as $img)
                                     <div class="relative group">
-                                        {{-- Cek apakah URL eksternal atau lokal storage --}}
                                         @php
                                             $isUrl = filter_var($img, FILTER_VALIDATE_URL);
                                             $src = $isUrl ? $img : asset('storage/' . $img);
@@ -104,17 +103,14 @@
                                         <img src="{{ $src }}"
                                             class="w-full h-24 object-cover rounded border border-gray-600">
 
-                                        {{-- Checkbox untuk menghapus --}}
                                         <div class="absolute top-1 right-1">
                                             <input type="checkbox" name="delete_images[]" value="{{ $img }}"
-                                                class="w-5 h-5 text-red-600 bg-gray-800 border-gray-600 rounded focus:ring-red-500 cursor-pointer">
-                                        </div>
-                                        <div
-                                            class="absolute bottom-0 left-0 w-full bg-black/70 text-white text-xs text-center py-1 opacity-0 group-hover:opacity-100 transition">
-                                            Tick to delete
+                                                class="w-5 h-5 text-red-600 bg-gray-800 border-gray-600 rounded cursor-pointer">
                                         </div>
                                     </div>
-                                @endforeach
+                                @empty
+                                    <p class="text-gray-500 text-sm italic col-span-full">No images available.</p>
+                                @endforelse
                             </div>
                         @else
                             <p class="text-gray-500 text-sm italic">No images available.</p>

@@ -76,19 +76,24 @@ class AdminRoomController extends Controller
     {
         $room = RoomType::findOrFail($id);
 
-        // Ekstrak data untuk ditampilkan di form
         $ratePlans = is_string($room->rate_plans) ? json_decode($room->rate_plans, true) : $room->rate_plans;
         $price = $ratePlans[0]['price_per_night'] ?? 0;
 
         $amenities = is_string($room->amenities) ? json_decode($room->amenities, true) : $room->amenities;
-        $amenitiesString = implode(', ', $amenities ?? []);
+        // Pastikan array sebelum di-implode
+        $amenitiesString = implode(', ', is_array($amenities) ? $amenities : []);
 
-        $images = is_string($room->gallery_images) ? json_decode($room->gallery_images, true) : $room->gallery_images;
-        $imagesString = implode(', ', $images ?? []);
+        // PERBAIKAN DI SINI:
+        $currentImages = is_string($room->gallery_images) ? json_decode($room->gallery_images, true) : $room->gallery_images;
+
+        // Paksa jadi array kosong jika hasil decode null/bukan array
+        if (!is_array($currentImages)) {
+            $currentImages = [];
+        }
 
         $occupancy = is_string($room->occupancy) ? json_decode($room->occupancy, true) : $room->occupancy;
 
-        return view('admin.rooms.edit', compact('room', 'price', 'amenitiesString', 'imagesString', 'occupancy'));
+        return view('admin.rooms.edit', compact('room', 'price', 'amenitiesString', 'currentImages', 'occupancy'));
     }
 
     // Update kamar
