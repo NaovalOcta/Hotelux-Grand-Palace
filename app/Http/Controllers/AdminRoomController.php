@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\RoomType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class AdminRoomController extends Controller
 {
@@ -85,7 +86,7 @@ class AdminRoomController extends Controller
                 'max_children' => (int)$request->max_children
             ],
             'amenities' => $amenities,
-            'gallery_images' => $galleryImages, // Array path disimpan otomatis sebagai JSON (jika cast di model benar)
+            'gallery_images' => $galleryImages,
             'rate_plans' => $ratePlans
         ]);
 
@@ -122,22 +123,51 @@ class AdminRoomController extends Controller
     {
         $room = RoomType::findOrFail($id);
 
-        // VALIDASI UPDATE
         $request->validate([
             'name' => 'required|string',
             'price_per_night' => 'required|numeric',
+            // Gunakan 'nullable' agar tidak wajib upload gambar saat edit
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
-        ], [
-            'images.*.mimes' => 'Format gambar ditolak! Gunakan JPG, JPEG, PNG, atau WEBP.',
-            'images.*.max' => 'Ukuran gambar maksimal 2MB.',
         ]);
 
-        // Proses ulang array
-        $amenities = $request->amenities_input ? array_map('trim', explode(',', $request->amenities_input)) : [];
-        $images = $request->images_input ? array_map('trim', explode(',', $request->images_input)) : [];
+        // 1. Ambil Gambar Lama (Handle jika data database null/string/array)
+        $existingImages = $room->gallery_images;
 
-        // Update Rate Plans
+        // Jika karena suatu alasan formatnya string JSON, decode dulu
+        if (is_string($existingImages)) {
+            $existingImages = json_decode($existingImages, true);
+        }
+        // Pastikan selalu array
+        if (!is_array($existingImages)) {
+            $existingImages = [];
+        }
+
+        // 2. Filter Gambar yang Dihapus
+        $imagesToDelete = $request->input('delete_images', []);
+        $keptImages = [];
+
+        foreach ($existingImages as $img) {
+            if (in_array($img, $imagesToDelete)) {
+                // Hapus file dari penyimpanan jika itu file lokal (bukan URL)
+                if (!filter_var($img, FILTER_VALIDATE_URL)) {
+                    Storage::disk('public')->delete($img);
+                }
+            } else {
+                $keptImages[] = $img;
+            }
+        }
+
+        // 3. Tambah Gambar Baru (Jika ada upload)
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                // Simpan dan ambil path-nya
+                $path = $file->store('rooms', 'public');
+                $keptImages[] = $path;
+            }
+        }
+
+        $amenities = $request->amenities_input ? array_map('trim', explode(',', $request->amenities_input)) : [];
         $ratePlans = [[
             'name' => 'Standard Rate',
             'price_per_night' => (int)$request->price_per_night,
@@ -157,7 +187,7 @@ class AdminRoomController extends Controller
                 'max_children' => (int)$request->max_children
             ],
             'amenities' => $amenities,
-            'gallery_images' => $images,
+            'gallery_images' => $keptImages, // Array final (Sisa lama + Baru)
             'rate_plans' => $ratePlans
         ]);
 

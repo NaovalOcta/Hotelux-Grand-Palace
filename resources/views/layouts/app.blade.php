@@ -49,6 +49,7 @@
 
     <script type="module" src="{{ asset('js/app.js') }}"></script>
     <script type="module" src="{{ asset('js/landing-page-interaction.js') }}"></script>
+    <script type="module" src="{{ asset('js/toggle-password.js') }}"></script>
     @stack('scripts')
 </body>
 
