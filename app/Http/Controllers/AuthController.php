@@ -27,8 +27,8 @@ class AuthController extends Controller
         // tanpa validasi tipe object User yang ketat, yang menyebabkan error Type Error tadi.
 
         if (! Auth::guard('web')->attempt($credentials)) {
-             // Jika gagal login session
-             if (!request()->expectsJson()) {
+            // Jika gagal login session
+            if (!request()->expectsJson()) {
                 return back()->withErrors(['email' => 'Unauthorized / Wrong Credentials']);
             }
             return response()->json(['error' => 'Unauthorized'], 401);
@@ -67,7 +67,7 @@ class AuthController extends Controller
             'phone' => 'required|string',
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             if (!request()->expectsJson()) {
                 return back()->withErrors($validator)->withInput();
             }
@@ -82,13 +82,12 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
-        // Auto login setelah register
-        $token = Auth::guard('api')->login($user);
-
         if (!request()->expectsJson()) {
-            Auth::guard('web')->login($user); // Login session untuk browser
+            Auth::guard('web')->login($user);
             return redirect()->route('home')->with('success', 'Registration successful!');
         }
+
+        $token = Auth::guard('api')->login($user);
 
         return response()->json([
             'message' => 'User successfully registered',
@@ -106,8 +105,8 @@ class AuthController extends Controller
 
     public function logout()
     {
-        Auth::guard('api')->logout(); // Logout JWT
-        Auth::guard('web')->logout(); // Logout Session Web
+        Auth::guard('api')->logout();
+        Auth::guard('web')->logout();
 
         if (!request()->expectsJson()) {
             return redirect()->route('login');
